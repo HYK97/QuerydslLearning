@@ -1,29 +1,36 @@
-package study.querydsl.Entitiy;
+package study.querydsl;
 
+
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Commit;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import study.querydsl.Entitiy.Member;
+import study.querydsl.Entitiy.QMember;
+import study.querydsl.Entitiy.Team;
 
 import javax.persistence.EntityManager;
-
-
 import java.util.List;
+import static org.hamcrest.CoreMatchers.is;
 
-import static org.junit.jupiter.api.Assertions.*;
 
-@Transactional
+
 @SpringBootTest
-class MemberTest {
+@Transactional
+public class QuerydslBasicTest {
+
 
     @Autowired
     EntityManager em;
 
-    @Test
+    JPAQueryFactory queryFactory;
 
+    @BeforeEach
     public void testEntity() {
+        queryFactory = new JPAQueryFactory(em);
         Team teamA =new Team("teamA");
         Team teamB =new Team("teamB");
         em.persist(teamA);
@@ -33,13 +40,13 @@ class MemberTest {
         Member member2 =new Member("member2",20,teamA);
         Member member3 =new Member("member3",30,teamA);
         Member member4 =new Member("member4",40,teamA);
-        
+
         em.persist(member1);
         em.persist(member2);
         em.persist(member3);
         em.persist(member4);
-        
-        
+
+
         em.flush();
         em.clear();
 
@@ -48,9 +55,32 @@ class MemberTest {
         for (Member member : members) {
             System.out.println("member = " + member);
             System.out.println("member.getTeam() = " + member.getTeam());
-            
+
         }
 
     }
 
+
+    @Test
+    public void startJPQL() {
+        Member singleResult = em.createQuery("select m from Member m where m.username = :username", Member.class)
+                .setParameter("username", "member1")
+                .getSingleResult();
+
+        Assertions.assertThat(singleResult.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void startQueryDsl() {
+        QMember m =new QMember("m");
+
+        Member member = queryFactory
+                .select(m)
+                .from(m)
+                .where(m.username.eq("member1"))
+                .fetchOne();
+
+
+        Assertions.assertThat(member.getUsername()).isEqualTo("member1");
+    }
 }
