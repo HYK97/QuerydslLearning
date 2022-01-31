@@ -1,42 +1,32 @@
 package study.querydsl;
 
 
-
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.Entitiy.Member;
 import study.querydsl.Entitiy.QMember;
 import study.querydsl.Entitiy.Team;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
-import java.util.List;
-import com.querydsl.jpa.JPAExpressions;
-
 import study.querydsl.dto.MemberDto;
 import study.querydsl.dto.QMemberDto;
 import study.querydsl.dto.UserDto;
 
-import static com.querydsl.jpa.JPAExpressions.*;
+import javax.persistence.EntityManager;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.shouldHaveThrown;
 import static study.querydsl.Entitiy.QMember.member;
-import static study.querydsl.Entitiy.QTeam.team;
 
 
 @SpringBootTest
@@ -314,5 +304,95 @@ public class QuerydslMiddleTest {
     public BooleanExpression  whereOrParam (String usernameParam, Integer ageParam){ //or 조건으로 만들어봄
         return (usernameParam !=null && ageParam !=null) ? usernameEq(usernameParam).or(ageEq(ageParam)) : null;
     }
+
+
+    // 벌크쿼리 배치
+
+    @Test
+    @Commit
+    public void bulkUpdate() throws Exception{
+
+
+        /** 실행전
+         * member1 -> DB 비회원
+         * member2 -> DB 비회원
+         * member3 -> DB member3
+         * member4 -> DB member4
+         *
+         **/
+
+       long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+
+       em.flush(); // DB - 영속성콘텐츠 동기화작업.
+       em.clear();
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        for (Member member1 : result) {
+            System.out.println("member1 = " + member1);
+        }
+
+        /** 실행후
+         * 영속성 컨텍스트와 매칭이안됌
+         * member1 -> DB 비회원
+         * member2 -> DB 비회원
+         * member3 -> DB member3
+         * member4 -> DB member4
+         **/
+    }
+
+    @Test
+    public void bulkAdd() throws Exception{
+
+        queryFactory
+                .update(member)
+                .set(member.age,member.age.add(1))//빼기는 add(-1) 하면됌.
+                .execute();
+
+    }
+
+    @Test
+    public void bulkDelete() throws Exception{
+
+        queryFactory
+                .delete(member)
+                .where(member.age.gt(18))
+                .execute();
+    }
+
+
+    // 사용자 db 함수는 해당 DB dialect를 상속받아서 설정후에 사용해야함
+    @Test
+    public void sqlFunction() throws Exception{
+        List<String> result = queryFactory
+                .select(Expressions.stringTemplate(
+                        "function('replace',{0},{1},{2})", member.username, "member", "M"))
+                .from(member)
+                .fetch();
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
+    public void sqlFunction2() throws Exception{
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+                .where(member.username.eq(member.username.lower()))
+                //.where(member.username.eq(Expressions.stringTemplate("function('lower',{0})", member.username)))
+                .fetch();
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+
 
 }
