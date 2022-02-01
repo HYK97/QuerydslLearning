@@ -1,6 +1,7 @@
 package study.querydsl.Entitiy;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -50,4 +51,5 @@ public class Member {
     public Member(String username) {
         this(username,0);
     }
+
 }

@@ -1,10 +1,8 @@
 package study.querydsl.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import study.querydsl.Entitiy.Member;
 import study.querydsl.dto.MemberDto;
 import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.dto.MemberTeamDto;
@@ -27,11 +25,11 @@ public class MemberController {
 
     @Transactional
     @GetMapping("/v1/createMember")
-    public void create(MemberTeamDto memberTeamDto) throws IllegalAccessException {
+    @ResponseBody
+    public Object create(MemberTeamDto memberTeamDto) throws IllegalAccessException {
 
-            memberJpaRepository.saveByQueryDsl(memberTeamDto);
-
-
+        memberJpaRepository.saveByQueryDsl(memberTeamDto);
+        return memberJpaRepository.saveByQueryDsl(memberTeamDto)!=null ? memberJpaRepository.saveByQueryDsl(memberTeamDto): "실패";
 
     }
 

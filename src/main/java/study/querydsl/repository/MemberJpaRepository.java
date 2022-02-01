@@ -167,7 +167,7 @@ public class MemberJpaRepository {
      *     private String teamName;
      *     */
     @Transactional
-    public void saveByQueryDsl(MemberTeamDto memberTeamDto) throws IllegalAccessException {
+    public MemberTeamDto saveByQueryDsl(MemberTeamDto memberTeamDto) throws IllegalAccessException {
 
             if(ChkParam(memberTeamDto, new String[]{"username", "age","teamName"})) {
                 Team team = null;
@@ -182,6 +182,10 @@ public class MemberJpaRepository {
                 member= new Member(memberTeamDto.getUsername(), memberTeamDto.getAge(),team);
                 saveMember(member);
 
+                return new MemberTeamDto(member.getId(),member.getUsername(),member.getAge(),team.getId(),team.getName());
+
+            }else {
+                return null;
             }
     }
 
