@@ -4,6 +4,7 @@ package study.querydsl.dto;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import study.querydsl.Entitiy.Member;
 
 @NoArgsConstructor
 @Data
@@ -22,4 +23,8 @@ public class MemberDto {
         this.username = username;
         this.age = age;
     }
+    public Member converMember() {
+        return new Member(this.username,this.age);
+    }
+
 }

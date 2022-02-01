@@ -2,8 +2,12 @@ package study.querydsl.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import study.querydsl.Entitiy.Member;
+import study.querydsl.Entitiy.Team;
 
 @Data
+@NoArgsConstructor
 public class MemberTeamDto {
 
     private Long memberId;
@@ -20,5 +24,13 @@ public class MemberTeamDto {
         this.age = age;
         this.teamId = teamId;
         this.teamName = teamName;
+    }
+
+    public Team convertTeam() {
+        return new Team(this.teamName);
+    }
+
+    public Member converMember() { // 좀더생각해봐야함
+        return new Member(this.username,this.age);
     }
 }

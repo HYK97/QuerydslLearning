@@ -21,4 +21,6 @@ public class MemberSearchCondition {
         this.ageGoe = ageGoe;
         this.ageLoe = ageLoe;
     }
+
+
 }

@@ -67,7 +67,7 @@ class MemberJpaRepositoryTest {
 
         Member member = new Member("member1",5);
 
-        memberJpaRepository.save(member);
+        memberJpaRepository.saveMember(member);
         Member findMember = memberJpaRepository.findById(member.getId()).get();
         assertThat(findMember).isEqualTo(member);
         List<Member> result1 = memberJpaRepository.findAll();
@@ -83,7 +83,7 @@ class MemberJpaRepositoryTest {
     public void basicQueryDslTest() throws Exception{
 
         Member member = new Member("member1",5);
-        memberJpaRepository.save(member);
+        memberJpaRepository.saveMember(member);
 
         Member findMember = memberJpaRepository.findById(member.getId()).get();
         assertThat(findMember).isEqualTo(member);
