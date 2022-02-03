@@ -21,7 +21,6 @@ import static study.querydsl.Entitiy.QMember.member;
 import static study.querydsl.Entitiy.QTeam.team;
 
 @Repository
-
 public class MemberJpaRepository {
 
     private final EntityManager em;
