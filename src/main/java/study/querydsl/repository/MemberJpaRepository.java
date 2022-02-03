@@ -1,31 +1,24 @@
 package study.querydsl.repository;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 import study.querydsl.Entitiy.Member;
-import study.querydsl.Entitiy.QMember;
-import study.querydsl.Entitiy.QTeam;
 import study.querydsl.Entitiy.Team;
-import study.querydsl.dto.MemberDto;
 import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.dto.MemberTeamDto;
 import study.querydsl.dto.QMemberTeamDto;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.transaction.Transactional;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
-import static org.springframework.util.StringUtils.*;
+import static org.springframework.util.StringUtils.hasText;
 import static study.querydsl.Entitiy.QMember.member;
-import static study.querydsl.Entitiy.QTeam.*;
+import static study.querydsl.Entitiy.QTeam.team;
 
 @Repository
 
@@ -80,6 +73,14 @@ public class MemberJpaRepository {
                 .fetch();
     }
 
+    public void saveTeam(Team team) {
+        em.persist(team);
+    }
+
+    /**
+     *
+     * searchMember builder 이용
+     *     */
 
     public List<MemberTeamDto> searchByBuilder(MemberSearchCondition condition){
 
@@ -113,6 +114,12 @@ public class MemberJpaRepository {
     }
 
 
+
+
+    /**
+     *
+     * searchMember WhereParam 이용
+     *     */
     public List<MemberTeamDto> searchByWhere(MemberSearchCondition condition){
 
         return queryFactory
@@ -150,9 +157,6 @@ public class MemberJpaRepository {
         return hasText(username) ? member.username.eq(username) : null;
     }
 
-    public void saveTeam(Team team) {
-        em.persist(team);
-    }
 
 
 
@@ -190,7 +194,7 @@ public class MemberJpaRepository {
     }
 
 
-
+    //DTO 값 널체크
     public boolean ChkParam(Object obj, String[] valueNames) throws IllegalAccessException{
 
         for (Field field : obj.getClass().getDeclaredFields()) {
