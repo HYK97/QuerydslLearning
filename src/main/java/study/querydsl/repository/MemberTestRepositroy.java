@@ -7,8 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import study.querydsl.Entitiy.Member;
-import study.querydsl.Entitiy.QMember;
-import study.querydsl.Entitiy.QTeam;
 import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.repository.support.QueryDsl4RepositorySupport;
 
@@ -61,6 +59,7 @@ public class MemberTestRepositroy extends QueryDsl4RepositorySupport {
                             ageLoeEq(condition.getAgeLoe())));
 
     }
+
 
 
     public Page<Member> applyPagination2(MemberSearchCondition condition, Pageable pageable) {
