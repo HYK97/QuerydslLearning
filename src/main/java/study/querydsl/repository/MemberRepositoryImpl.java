@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.data.support.PageableExecutionUtils;
+import study.querydsl.Entitiy.Member;
 import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.dto.MemberTeamDto;
 import study.querydsl.dto.QMemberTeamDto;
@@ -23,13 +25,16 @@ import static study.querydsl.Entitiy.QTeam.team;
 import static org.springframework.data.domain.Pageable.*;
 
 //명명 규칙 중요 Impl 이라고해야댐
-public class MemberRepositoryImpl implements MemberRepositoryCustom {
+public class MemberRepositoryImpl implements MemberRepositoryCustom  {
+
+
 
     private final JPAQueryFactory queryFactory;
 
     public MemberRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
     }
+
 
     @Override
     public List<MemberTeamDto> search(MemberSearchCondition condition){
@@ -74,7 +79,8 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
     @Override //쉽거나 데이터가 적을때는이런식으로 하자.
     public Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable) { //몇페이지 조회할지 알려주는 매개변수
-        QueryResults<MemberTeamDto> results = queryFactory
+
+          QueryResults<MemberTeamDto> results = queryFactory
                 .select(new QMemberTeamDto(
                         member.id.as("memberId")
                         , member.username
@@ -98,7 +104,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
         return new PageImpl<>(content,pageable,total);
     }
-
 
 
     //복잡한구현 두개 따로 하는경우 -> 카운트 쿼리가 컨텐츠 쿼리보다 쉬울때. 복잡한 쿼리 두방을 날리기보단 한개는 쉽게날리면 성능 최적화 시킬수있음
