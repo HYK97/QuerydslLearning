@@ -2,11 +2,13 @@ package study.querydsl.repository;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.dto.MemberTeamDto;
 import study.querydsl.dto.QMemberTeamDto;
@@ -105,15 +107,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
         List<MemberTeamDto> content = getMemberTeamDtos(condition, pageable);
           // 예를 들어 카운트 먼저날리고 없으면 안날릴때 와 같이 최적화함. 왠만하면 카운터 최적화하자 데이터 많을때
-        long total = getTotal(condition);
-
-        return new PageImpl<>(content,pageable,total);
-
-    }
-
-    //이런식으로 리팩토링해서써도된다.
-    private long getTotal(MemberSearchCondition condition) {
-        return queryFactory
+        JPAQuery<MemberTeamDto> countQuery = queryFactory
                 .select(new QMemberTeamDto(
                         member.id.as("memberId")
                         , member.username
@@ -127,9 +121,16 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         usernameEq(condition.getUsername())
                         , teamNameEq(condition.getTeamName())
                         , ageGoeEq(condition.getAgeGoe())
-                        , ageLoeEq(condition.getAgeLoe()))
-                .fetchCount();
+                        , ageLoeEq(condition.getAgeLoe()));
+
+        //카운트 쿼리 최적화 -> 마지막 페이지 혹은 첫번째 페이지에 페이징 수보다 컨텐츠가 적을때만 날아가도록 최적화 시킴.
+        return PageableExecutionUtils.getPage(content,pageable,countQuery::fetchCount);
+        //return new PageImpl<>(content,pageable,total);
+
     }
+
+    //이런식으로 리팩토링해서써도된다.
+
 
     private List<MemberTeamDto> getMemberTeamDtos(MemberSearchCondition condition, Pageable pageable) {
         List<MemberTeamDto> content = queryFactory
